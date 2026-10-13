@@ -158,23 +158,38 @@ elif page == "Explore the Data":
         st.download_button("Download descriptive statistics",summary.to_csv().encode(),file_name="energy_descriptive_statistics.csv",mime="text/csv")
 
 elif page == "Predict Consumption":
-    header("Try a consumption estimate","Adjust sensor readings and time features to estimate use under a set of conditions.")
+    header("Try a consumption estimate","Enter familiar sensor readings and weather conditions to estimate appliance energy use.")
     inputs=[x for x in df.columns if x not in ["date",TARGET,"rv1","rv2"]]
     defaults=df[inputs].median(numeric_only=True)
     values={}
+    # Friendly labels are for display only; raw dataset column names remain the model inputs.
+    field_labels = {
+        "T1": "Temperature sensor 1 (°C)", "RH_1": "Humidity sensor 1 (%)",
+        "T2": "Temperature sensor 2 (°C)", "RH_2": "Humidity sensor 2 (%)",
+        "T3": "Temperature sensor 3 (°C)", "RH_3": "Humidity sensor 3 (%)",
+        "T4": "Temperature sensor 4 (°C)", "RH_4": "Humidity sensor 4 (%)",
+        "T5": "Temperature sensor 5 (°C)", "RH_5": "Humidity sensor 5 (%)",
+        "T6": "Temperature sensor 6 (°C)", "RH_6": "Humidity sensor 6 (%)",
+        "T7": "Temperature sensor 7 (°C)", "RH_7": "Humidity sensor 7 (%)",
+        "T8": "Temperature sensor 8 (°C)", "RH_8": "Humidity sensor 8 (%)",
+        "T9": "Temperature sensor 9 (°C)", "RH_9": "Humidity sensor 9 (%)",
+        "T_out": "Outdoor temperature (°C)", "RH_out": "Outdoor humidity (%)",
+        "lights": "Lighting energy use (Wh)", "Press_mm_hg": "Atmospheric pressure (mmHg)",
+        "Windspeed": "Wind speed", "Visibility": "Visibility", "Tdewpoint": "Dew point temperature (°C)",
+    }
     left,mid,right=st.columns(3)
     with left:
-        st.markdown("**Indoor climate**")
+        st.markdown("**Indoor sensor readings**")
         for n in ["T1","RH_1","T2","RH_2","T3","RH_3","T4","RH_4"]:
-            if n in inputs: values[n]=st.number_input(n,value=float(defaults[n]),format="%.2f")
+            if n in inputs: values[n]=st.number_input(field_labels.get(n,n),value=float(defaults[n]),format="%.2f",help="Friendly label for dataset field " + n)
     with mid:
-        st.markdown("**Other rooms and weather**")
+        st.markdown("**Additional sensors and outdoor conditions**")
         for n in ["T5","RH_5","T6","RH_6","T7","RH_7","T8","RH_8","T9","RH_9","T_out","RH_out"]:
-            if n in inputs: values[n]=st.number_input(n,value=float(defaults[n]),format="%.2f")
+            if n in inputs: values[n]=st.number_input(field_labels.get(n,n),value=float(defaults[n]),format="%.2f",help="Friendly label for dataset field " + n)
     with right:
-        st.markdown("**Weather and lights**")
+        st.markdown("**Weather and lighting**")
         for n in ["lights","Press_mm_hg","Windspeed","Visibility","Tdewpoint"]:
-            if n in inputs: values[n]=st.number_input(n,value=float(defaults[n]),format="%.2f")
+            if n in inputs: values[n]=st.number_input(field_labels.get(n,n),value=float(defaults[n]),format="%.2f",help="Friendly label for dataset field " + n)
         day=st.date_input("Date",value=df["date"].iloc[-1].date())
         clock=st.time_input("Time",value=df["date"].iloc[-1].time().replace(second=0,microsecond=0))
     if st.button("⚡ Estimate appliance energy",type="primary",use_container_width=True):
